@@ -33,40 +33,78 @@ fun run(path:String, out:String) {
     println(ingredient)
 
     val slices = arrayListOf<Slice>();
-
+    var cells = ArrayList<Cell>()
+    var slice = Slice(cells)
     for(r in 0 until pizza.rowCount){
+        cells = ArrayList<Cell>()
+        slice = Slice(cells)
         for(c in 0 until pizza.columnCount) {
 
-            val last = pizza[r, c-1] ?: continue;
+            val current = pizza[r, c] ?: continue;
 
-            val current = pizza[r, c];
-
-            if(last.type != current!!.type && !isInSlices(slices, current) && !isInSlices(slices, last)) {
+            // Si la part n'a pas assez de cellules et que la cellule n'est pas deja dans une part on l'ajoute a la part
+            if(slice.cells.size < maxCellsPerSlice.toInt() && !isInSlices(slices, current)) {
                 println("part possible")
-                val cells = ArrayList<Cell>()
-                cells.add(last)
+
                 cells.add(current)
-                val slice = Slice(cells)
+            // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
+            } else if (slice.cells.size == maxCellsPerSlice.toInt()) {
                 slices.add(slice)
+                println(slice)
+                cells = ArrayList<Cell>()
+                slice = Slice(cells)
+                cells.add(current)
+            // Sinon si on a une part a une cellule et que l'on est a la fin de la ligne on l'ajoute
+            // TODO : verifier qu'on a bien assez d'ingredients de chaque type
+            } else if (cells.size >= 1 && r == pizza.columnCount - 1) {
+                cells.add(current)
+                slices.add(slice)
+                println(slice)
+                cells = ArrayList<Cell>()
+                slice = Slice(cells)
+                cells.add(current)
+            //Sinon on cree une nouvelle part
+            } else {
+                cells = ArrayList<Cell>()
+                slice = Slice(cells)
             }
 
         }
     }
-
+    cells = ArrayList<Cell>()
+    slice = Slice(cells)
     for(c in 0 until pizza.columnCount){
+        cells = ArrayList<Cell>()
+        slice = Slice(cells)
         for(r in 0 until pizza.rowCount) {
 
-            val last = pizza[r-1, c] ?: continue;
+            //val last = pizza[r-1, c] ?: continue;
 
-            val current = pizza[r, c];
-
-            if(last.type != current!!.type && !isInSlices(slices, current) && !isInSlices(slices, last)) {
+            val current = pizza[r, c] ?: continue;
+            // Si la part n'a pas assez de cellules et que la cellule n'est pas deja dans une part on l'ajoute a la part
+            if(slice.cells.size < maxCellsPerSlice.toInt() && !isInSlices(slices, current)) {
                 println("part possible")
-                val cells = ArrayList<Cell>()
-                cells.add(last)
+
                 cells.add(current)
-                val slice = Slice(cells)
+            // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
+            } else if (slice.cells.size == maxCellsPerSlice.toInt()) {
                 slices.add(slice)
+                println(slice)
+                cells = ArrayList<Cell>()
+                slice = Slice(cells)
+                cells.add(current)
+            // Sinon si on a une part a une cellule et que l'on est a la fin de la colonne on l'ajoute
+            // TODO : verifier qu'on a bien assez d'ingredients de chaque type
+            } else if (cells.size >= 1 && r == pizza.rowCount - 1) {
+                cells.add(current)
+                slices.add(slice)
+                println(slice)
+                cells = ArrayList<Cell>()
+                slice = Slice(cells)
+                cells.add(current)
+            } else {
+                cells = ArrayList<Cell>()
+                slice = Slice(cells)
             }
 
         }
@@ -74,12 +112,14 @@ fun run(path:String, out:String) {
 
     File(out).printWriter().use { out ->
         out.println(slices.size)
-
+        var res = "";
         slices.forEach {
+
             slice -> slice.cells.forEach {
-                cell -> out.print("${cell.row} ${cell.col} ")
+                cell -> res += ("${cell.row} ${cell.col} ")
             }
-            out.print("\n")
+            out.println("${res.substring(0,res.length-1)}")
+            res=""
         }
     }
 
