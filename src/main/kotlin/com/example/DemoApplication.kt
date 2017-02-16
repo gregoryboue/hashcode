@@ -1,14 +1,16 @@
 package com.example
 
 import java.io.File
+import java.util.*
 
 
 fun main(args: Array<String>) {
-    run("D:\\projets\\hashcode-pizza\\src\\main\\resources\\small.in")
+    run("D:\\projets\\hashcode-pizza\\src\\main\\resources\\small.in", "D:\\projets\\hashcode-pizza\\src\\main\\resources\\small.out")
+    run("D:\\projets\\hashcode-pizza\\src\\main\\resources\\example.in", "D:\\projets\\hashcode-pizza\\src\\main\\resources\\example.out")
 }
 
 
-fun run(path:String) {
+fun run(path:String, out:String) {
 
     val lines = File(path).readLines()
 
@@ -30,38 +32,76 @@ fun run(path:String) {
     val ingredient = pizza[1,1]
     println(ingredient)
 
-
-
-//    pizza.ingredients.forEachIndexed { r, c, ingredient ->
-//        println("$r, $c, $ingredient")
-//    }
+    val slices = arrayListOf<Slice>();
 
     for(r in 0 until pizza.rowCount){
         for(c in 0 until pizza.columnCount) {
 
-            if()
+            val last = pizza[r, c-1] ?: continue;
+
+            val current = pizza[r, c];
+
+            if(last.type != current!!.type && !isInSlices(slices, current) && !isInSlices(slices, last)) {
+                println("part possible")
+                val slice = Slice(last, current)
+                slices.add(slice)
+            }
 
         }
     }
 
+    for(c in 0 until pizza.columnCount){
+        for(r in 0 until pizza.rowCount) {
 
+            val last = pizza[r-1, c] ?: continue;
 
+            val current = pizza[r, c];
+
+            if(last.type != current!!.type && !isInSlices(slices, current) && !isInSlices(slices, last)) {
+                println("part possible")
+                val slice = Slice(last, current)
+                slices.add(slice)
+            }
+
+        }
+    }
+
+    File(out).printWriter().use { out ->
+        out.println(slices.size)
+
+        slices.forEach {
+            slice -> out.println("${slice.first.row} ${slice.first.col} ${slice.last.row} ${slice.last.col}")
+        }
+    }
+
+}
+
+fun isInSlices(slices: ArrayList<Slice>, cell:Cell):Boolean {
+    println("isInSlice ? $cell" )
+    val result = slices.filter { slice -> slice.isIn(cell)}.size > 0
+    println("result : $result")
+    return result
 }
 
 data class Slice(val first:Cell, val last:Cell) {
 
-    // nombre de cellules dans la part
-    fun cellsCount() {
-        first.row
+    fun isIn(cell:Cell):Boolean {
+        println("cell  :$cell")
+        println("first :$first")
+        println("last :$last")
+        println("result :" + (first == cell || last == cell))
+        return (first == cell || last == cell)
     }
 }
 
-data class Cell(val row:Int, val col:Int)
+data class Cell(val row:Int, val col:Int, val type:String) {
+
+}
 
 
 data class Pizza(val rowCount:Int, val columnCount:Int) {
 
-    val ingredients: Board<Ingredient?>
+    val ingredients: Board<Cell?>
 
     init {
         println("initializing Pizza")
@@ -75,12 +115,18 @@ data class Pizza(val rowCount:Int, val columnCount:Int) {
 
         rows.forEachIndexed { rowIndex, row ->
                 row.forEachIndexed { colIndex, value ->
-                    ingredients[rowIndex, colIndex] = Ingredient("$value")
+                    ingredients[rowIndex, colIndex] = Cell(rowIndex, colIndex,"$value")
                 }
         }
     }
 
-    operator fun get(row: Int, col: Int): Ingredient? = ingredients[row][col]
+    operator fun get(row: Int, col: Int): Cell?  {
+        try {
+            return ingredients[row][col]
+        } catch(e:ArrayIndexOutOfBoundsException) {
+            return null
+        }
+    }
 
     override fun toString(): String {
         val str = StringBuilder()
@@ -92,10 +138,6 @@ data class Pizza(val rowCount:Int, val columnCount:Int) {
     }
 }
 
-// représente une cellule
-data class Ingredient(val type:String) {
-    override fun toString() = type
-}
 
 
 
