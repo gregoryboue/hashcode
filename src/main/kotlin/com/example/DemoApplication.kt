@@ -5,8 +5,8 @@ import java.util.*
 
 
 fun main(args: Array<String>) {
-    run("D:\\projets\\hashcode-pizza\\src\\main\\resources\\small.in", "D:\\projets\\hashcode-pizza\\src\\main\\resources\\small.out")
-    run("D:\\projets\\hashcode-pizza\\src\\main\\resources\\example.in", "D:\\projets\\hashcode-pizza\\src\\main\\resources\\example.out")
+    run("C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\small.in", "C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\small.out")
+    run("C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\example.in", "C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\example.out")
 }
 
 
@@ -43,7 +43,10 @@ fun run(path:String, out:String) {
 
             if(last.type != current!!.type && !isInSlices(slices, current) && !isInSlices(slices, last)) {
                 println("part possible")
-                val slice = Slice(last, current)
+                val cells = ArrayList<Cell>()
+                cells.add(last)
+                cells.add(current)
+                val slice = Slice(cells)
                 slices.add(slice)
             }
 
@@ -59,7 +62,10 @@ fun run(path:String, out:String) {
 
             if(last.type != current!!.type && !isInSlices(slices, current) && !isInSlices(slices, last)) {
                 println("part possible")
-                val slice = Slice(last, current)
+                val cells = ArrayList<Cell>()
+                cells.add(last)
+                cells.add(current)
+                val slice = Slice(cells)
                 slices.add(slice)
             }
 
@@ -70,7 +76,10 @@ fun run(path:String, out:String) {
         out.println(slices.size)
 
         slices.forEach {
-            slice -> out.println("${slice.first.row} ${slice.first.col} ${slice.last.row} ${slice.last.col}")
+            slice -> slice.cells.forEach {
+                cell -> out.print("${cell.row} ${cell.col} ")
+            }
+            out.print("\n")
         }
     }
 
@@ -83,15 +92,25 @@ fun isInSlices(slices: ArrayList<Slice>, cell:Cell):Boolean {
     return result
 }
 
-data class Slice(val first:Cell, val last:Cell) {
+data class Slice(val cells : ArrayList<Cell>) {
 
     fun isIn(cell:Cell):Boolean {
         println("cell  :$cell")
-        println("first :$first")
-        println("last :$last")
-        println("result :" + (first == cell || last == cell))
-        return (first == cell || last == cell)
+        println("cells :$cells")
+        println("result :" + (cells.indexOf(cell) != -1))
+        return (cells.indexOf(cell) != -1)
     }
+
+    fun numberOfCellsOfElement(type:String):Int {
+        var res = 0
+        cells.forEach {
+            cell -> if (cell.type == type) {
+                res++
+            }
+        }
+        return res
+    }
+
 }
 
 data class Cell(val row:Int, val col:Int, val type:String) {
