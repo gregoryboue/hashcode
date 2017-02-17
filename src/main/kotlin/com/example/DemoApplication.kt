@@ -48,7 +48,8 @@ fun run(path:String, out:String) {
 
                 cells.add(current)
             // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
-            } else if (slice.cells.size == maxCellsPerSlice.toInt()) {
+            } else if (slice.cells.size == maxCellsPerSlice.toInt() && slice.numberOfCellsOfElement("T") >= eltsPerSlice.toInt()
+                    && slice.numberOfCellsOfElement("M") >= eltsPerSlice.toInt()) {
                 slices.add(slice)
                 println(slice)
                 cells = ArrayList<Cell>()
@@ -87,7 +88,8 @@ fun run(path:String, out:String) {
 
                 cells.add(current)
             // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
-            } else if (slice.cells.size == maxCellsPerSlice.toInt()) {
+            } else if (slice.cells.size == maxCellsPerSlice.toInt() && slice.numberOfCellsOfElement("T") >= eltsPerSlice.toInt()
+            && slice.numberOfCellsOfElement("M") >= eltsPerSlice.toInt()) {
                 slices.add(slice)
                 println(slice)
                 cells = ArrayList<Cell>()
@@ -112,14 +114,9 @@ fun run(path:String, out:String) {
 
     File(out).printWriter().use { out ->
         out.println(slices.size)
-        var res = "";
-        slices.forEach {
 
-            slice -> slice.cells.forEach {
-                cell -> res += ("${cell.row} ${cell.col} ")
-            }
-            out.println("${res.substring(0,res.length-1)}")
-            res=""
+        slices.forEach {
+            slice -> out.println("${slice.cells.first().row} ${slice.cells.first().col} ${slice.cells.last().row} ${slice.cells.last().col}")
         }
     }
 
