@@ -5,8 +5,11 @@ import java.util.*
 
 
 fun main(args: Array<String>) {
-    run("C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\small.in", "C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\small.out")
-    run("C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\example.in", "C:\\Users\\Gregory\\IdeaProjects\\hashcode\\src\\main\\resources\\example.out")
+
+    run("D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\big.in", "D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\big.out")
+    run("D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\medium.in", "D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\medium.out")
+    run("D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\small.in", "D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\small.out")
+    run("D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\example.in", "D:\\dev\\repo_git\\hashcode\\src\\main\\resources\\example.out")
 }
 
 
@@ -43,28 +46,40 @@ fun run(path:String, out:String) {
             val current = pizza[r, c] ?: continue;
 
             // Si la part n'a pas assez de cellules et que la cellule n'est pas deja dans une part on l'ajoute a la part
-            if(slice.cells.size < maxCellsPerSlice.toInt() && !isInSlices(slices, current)) {
+            if(slice.cells.size < maxCellsPerSlice.toInt() && !current.isInSlice) {
                 println("part possible")
 
                 cells.add(current)
-            // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
+                //si la part est la derniere de la rangee et qu'elle est valide on l'ajoute
+                if (c == pizza.columnCount -1 && slice.numberOfCellsOfElement("T") >= eltsPerSlice.toInt()
+                        && slice.numberOfCellsOfElement("M") >= eltsPerSlice.toInt()) {
+                    slices.add(slice)
+                    slice.setCellUnavailable(pizza)
+                    println(slice)
+                    cells = ArrayList<Cell>()
+                    slice = Slice(cells)
+
+                }
+                // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
             } else if (slice.cells.size == maxCellsPerSlice.toInt() && slice.numberOfCellsOfElement("T") >= eltsPerSlice.toInt()
                     && slice.numberOfCellsOfElement("M") >= eltsPerSlice.toInt()) {
                 slices.add(slice)
+                slice.setCellUnavailable(pizza)
                 println(slice)
                 cells = ArrayList<Cell>()
                 slice = Slice(cells)
                 cells.add(current)
-            // Sinon si on a une part a une cellule et que l'on est a la fin de la ligne on l'ajoute
-            // TODO : verifier qu'on a bien assez d'ingredients de chaque type
+                // Sinon si on a une part a une cellule et que l'on est a la fin de la ligne on l'ajoute
+                // TODO : verifier qu'on a bien assez d'ingredients de chaque type
             } else if (cells.size >= 1 && r == pizza.columnCount - 1) {
                 cells.add(current)
                 slices.add(slice)
+                slice.setCellUnavailable(pizza)
                 println(slice)
                 cells = ArrayList<Cell>()
                 slice = Slice(cells)
                 cells.add(current)
-            //Sinon on cree une nouvelle part
+                //Sinon on cree une nouvelle part
             } else {
                 cells = ArrayList<Cell>()
                 slice = Slice(cells)
@@ -83,23 +98,36 @@ fun run(path:String, out:String) {
 
             val current = pizza[r, c] ?: continue;
             // Si la part n'a pas assez de cellules et que la cellule n'est pas deja dans une part on l'ajoute a la part
-            if(slice.cells.size < maxCellsPerSlice.toInt() && !isInSlices(slices, current)) {
+            if(slice.cells.size < maxCellsPerSlice.toInt() &&  !current.isInSlice) {
                 println("part possible")
 
                 cells.add(current)
-            // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
+
+                //si la part est la derniere de la colonne et qu'elle est valide on l'ajoute
+                if (c == pizza.rowCount -1 && slice.numberOfCellsOfElement("T") >= eltsPerSlice.toInt()
+                        && slice.numberOfCellsOfElement("M") >= eltsPerSlice.toInt()) {
+                    slices.add(slice)
+                    slice.setCellUnavailable(pizza)
+                    println(slice)
+                    cells = ArrayList<Cell>()
+                    slice = Slice(cells)
+
+                }
+                // Sinon si la part a le nombre limite de cellule on ajoute la part et on reinitialise
             } else if (slice.cells.size == maxCellsPerSlice.toInt() && slice.numberOfCellsOfElement("T") >= eltsPerSlice.toInt()
-            && slice.numberOfCellsOfElement("M") >= eltsPerSlice.toInt()) {
+                    && slice.numberOfCellsOfElement("M") >= eltsPerSlice.toInt()) {
                 slices.add(slice)
+                slice.setCellUnavailable(pizza)
                 println(slice)
                 cells = ArrayList<Cell>()
                 slice = Slice(cells)
                 cells.add(current)
-            // Sinon si on a une part a une cellule et que l'on est a la fin de la colonne on l'ajoute
-            // TODO : verifier qu'on a bien assez d'ingredients de chaque type
+                // Sinon si on a une part a une cellule et que l'on est a la fin de la colonne on l'ajoute
+                // TODO : verifier qu'on a bien assez d'ingredients de chaque type
             } else if (cells.size >= 1 && r == pizza.rowCount - 1) {
                 cells.add(current)
                 slices.add(slice)
+                slice.setCellUnavailable(pizza)
                 println(slice)
                 cells = ArrayList<Cell>()
                 slice = Slice(cells)
@@ -142,16 +170,27 @@ data class Slice(val cells : ArrayList<Cell>) {
         var res = 0
         cells.forEach {
             cell -> if (cell.type == type) {
-                res++
-            }
+            res++
+        }
         }
         return res
     }
 
+    fun setCellUnavailable(pizza:Pizza) {
+        cells.forEach {
+            cell -> pizza.ingredients[cell.row][cell.col]!!.setInSlice()
+        }
+    }
 }
 
 data class Cell(val row:Int, val col:Int, val type:String) {
-
+    var isInSlice: Boolean
+    init {
+        isInSlice = false
+    }
+    fun setInSlice() {
+        isInSlice = true
+    }
 }
 
 
@@ -170,9 +209,9 @@ data class Pizza(val rowCount:Int, val columnCount:Int) {
         }
 
         rows.forEachIndexed { rowIndex, row ->
-                row.forEachIndexed { colIndex, value ->
-                    ingredients[rowIndex, colIndex] = Cell(rowIndex, colIndex,"$value")
-                }
+            row.forEachIndexed { colIndex, value ->
+                ingredients[rowIndex, colIndex] = Cell(rowIndex, colIndex,"$value")
+            }
         }
     }
 
@@ -193,10 +232,3 @@ data class Pizza(val rowCount:Int, val columnCount:Int) {
         return "$str"
     }
 }
-
-
-
-
-
-
-
