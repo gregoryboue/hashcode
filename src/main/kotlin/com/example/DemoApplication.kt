@@ -71,7 +71,7 @@ fun run(path:String, out:String) {
                 cells.add(current)
                 // Sinon si on a une part a une cellule et que l'on est a la fin de la ligne on l'ajoute
                 // TODO : verifier qu'on a bien assez d'ingredients de chaque type
-            } else if (cells.size >= 1 && r == pizza.columnCount - 1) {
+            } else if (cells.size >= 1 && r == pizza.columnCount - 1  && slice.cells.size < maxCellsPerSlice.toInt() && !current.isInSlice) {
                 cells.add(current)
                 slices.add(slice)
                 slice.setCellUnavailable(pizza)
@@ -124,7 +124,7 @@ fun run(path:String, out:String) {
                 cells.add(current)
                 // Sinon si on a une part a une cellule et que l'on est a la fin de la colonne on l'ajoute
                 // TODO : verifier qu'on a bien assez d'ingredients de chaque type
-            } else if (cells.size >= 1 && r == pizza.rowCount - 1) {
+            } else if (cells.size >= 1 && r == pizza.rowCount - 1 && slice.cells.size < maxCellsPerSlice.toInt() && !current.isInSlice) {
                 cells.add(current)
                 slices.add(slice)
                 slice.setCellUnavailable(pizza)
